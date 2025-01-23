@@ -1,16 +1,23 @@
 import os
 import re
-import shutil
 import time
 import urllib.request
-import requests
 import spotipy
+import subprocess
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import APIC, ID3
 from yt_dlp import YoutubeDL
 from rich.console import Console
 from spotipy.oauth2 import SpotifyClientCredentials
 import urllib.parse
+
+# Checked to conection a Internet
+def check_internet_connection():
+    try:
+        urllib.request.urlopen('http://google.com', timeout=5)
+        return True
+    except urllib.request.URLError:
+        return False
 
 # Initialize Spotify credentials from environment variables
 SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
@@ -26,6 +33,21 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 console = Console()
 
 def main():
+    if not check_internet_connection():
+        raise EnvironmentError("There is no internet connection. Please check your connection and try again.")
+    
+    client_id = os.getenv("SPOTIPY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+
+    if not client_id:
+        client_id = input("Enter your SPOTIPY_CLIENT_ID: ").strip()
+        subprocess.run(["powershell", "-Command", f"$env:SPOTIPY_CLIENT_ID='{client_id}'"])
+
+    if not client_secret:
+        client_secret = input("Enter your SPOTIPY_CLIENT_SECRET: ").strip()
+        subprocess.run(["powershell", "-Command", f"$env:SPOTIPY_CLIENT_SECRET='{client_secret}'"])
+
+    output_dir = input("Destination folder name: ").strip()
     url, url_type = validate_url(input("Enter a Spotify URL: ").strip())
     songs = [get_track_info(url)] if url_type == "track" else get_playlist_info(url)
 
@@ -36,15 +58,13 @@ def main():
         search_term = f"{track_info['artist_name']} {track_info['track_title']} audio"
         try:
             video_link = find_youtube(search_term)
-
             console.print(
                 f"[magenta]({i}/{len(songs)})[/magenta] Downloading '[cyan]{track_info['artist_name']} - {track_info['track_title']}[/cyan]'..."
             )
-
-            audio = download_yt(video_link)
+            audio = download_yt(video_link,output_dir)
             if audio:
                 set_metadata(track_info, audio)
-                destination = os.path.join("../musicmegusta", os.path.basename(audio))
+                destination = os.path.join("../"+output_dir, os.path.basename(audio))
                 os.replace(audio, destination)
                 downloaded += 1
             else:
@@ -53,10 +73,10 @@ def main():
         except Exception as e:
             console.print(f"[red]Error downloading {track_info['track_title']}: {e}[/red]")
 
-    #clean_temp_folder("../musicmegusta/tmp") # Deteleted temp folder
+    #clean_temp_folder("../"+output_dir+"/tmp") # Optional deteleted temp folder
     end_time = time.time()
 
-    console.print(f"\nDownload location: {os.path.abspath('../musicmegusta')}\n")
+    console.print(f"\nDownload location: {os.path.abspath('../'+output_dir)}\n")
     console.print(
         f"[green]DOWNLOAD COMPLETED: {downloaded}/{len(songs)} song(s) downloaded.[/green]",
         style="on green",
@@ -110,11 +130,11 @@ def find_youtube(query):
     except Exception as e:
         raise ValueError(f"Failed to find YouTube video: {e}")
 
-def download_yt(yt_link):
+def download_yt(yt_link,output_dir):
     try:
-        # Configura las opciones para yt-dlp
-        output_dir = "../musicmegusta/tmp"
-        os.makedirs(output_dir, exist_ok=True)
+        # Configure options for yt-dlp
+        output_dire = "../"+output_dir+"/tmp"
+        os.makedirs(output_dire, exist_ok=True)
 
         ydl_opts = {
             "format": "bestaudio/best",
@@ -126,14 +146,14 @@ def download_yt(yt_link):
                 }
             ],
             "ffmpeg_location": "C:\\ffmpeg\\bin",
-            "outtmpl": os.path.join(output_dir, "%(title)+.100U.%(ext)s"),
+            "outtmpl": os.path.join(output_dire, "%(title)+.100U.%(ext)s"),
             "quiet": False,
             "noplaylist": True,
         }
 
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(yt_link, download=True)
-            return os.path.join(output_dir, f"{info['title']}.mp3")
+            return os.path.join(output_dire, f"{info['title']}.mp3")
 
     except Exception as e:
         raise ValueError(f"Failed to download YouTube audio: {e}")
@@ -164,7 +184,7 @@ def set_metadata(metadata, file_path):
     except Exception as e:
         raise ValueError(f"Failed to set metadata: {e}")
 
-#def clean_temp_folder(folder): # Deteleted temp folder
+#def clean_temp_folder(folder): # Optional deteleted temp folder, it is not necessary since some files give an error and remain stored in the tmp folder
     #if os.path.exists(folder):
         #shutil.rmtree(folder)
 
