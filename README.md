@@ -27,17 +27,18 @@
 4. Create an app by clicking on *create an app* and giving name and description for the app.
 5. Take a note of your *Client ID* and *Client Secret*, or URL URI *https://open.spotify.com/* from the app's page and selected *Web API*.
 6. Open your terminal and run `git clone https://github.com/mastersamm-db/spotify-playlist-downloader` or optionally download the zip file.
-7. run `cd spotify-playlist-downloader`.
-8. run in powershell `$env:SPOTIPY_CLIENT_ID='<your-client-id>'` or `set SPOTIPY_CLIENT_ID='<your-client-id>'` .
-9. run in powershell `$env:SPOTIPY_CLIENT_SECRET='<your-client-secret>'` or `set SPOTIPY_CLIENT_SECRET='<your-client-secret>'`.
-10. Finally, run `python playlist_en.py` and follow the instructions to download a song or a playlist from spotify.
+7. Run `cd spotify-playlist-downloader`.
+8. Run `python playlist_en.py` and follow the instructions to download a song or a playlist from spotify.
+
+    *Optional* Run in powershell `$env:SPOTIPY_CLIENT_ID='<your-client-id>'` or `set SPOTIPY_CLIENT_ID='<your-client-id>'` in case the python script doesn't work, it will automatically ask for it in order to start the download.
+    *Optional* Run in powershell `$env:SPOTIPY_CLIENT_SECRET='<your-client-secret>'` or `set SPOTIPY_CLIENT_SECRET='<your-client-secret>'` in case the python script doesn't work, it will automatically ask for it in order to start the download.
 
 ## Prerequisites
 Run the following command in the terminal after navigating to the project's directory:
 ```
 pip install -r requirements.txt
 ```
-# =============================================================================================================================================
+# ====================================================================================
 # Descargar listas de reproducción de Spotify
 # Español
 #### Video de demostración: https://youtu.be/bp0aS67imes
@@ -68,10 +69,11 @@ pip install -r requirements.txt
 4. Cree una aplicación haciendo clic en *crear una aplicación* y dando un nombre y una descripción para la aplicación.
 5. Tome nota de su *Client ID* y *Client Secret*, o URL URI *https://open.spotify.com/* de la página de la aplicación y seleccionar *Web API*.
 6. Abra su terminal y ejecute `git clone https://github.com/mastersamm-db/spotify-playlist-downloader` u opcionalmente descargue el archivo zip.
-7. ejecute `cd spotify-playlist-downloader`.
-8. ejecute en powershell `$env:SPOTIPY_CLIENT_ID='<your-client-id>'` o `set SPOTIPY_CLIENT_ID='<your-client-id>'`.
-9. ejecute en powershell `$env:SPOTIPY_CLIENT_SECRET='<your-client-secret>'` o `set SPOTIPY_CLIENT_SECRET='<your-client-secret>'`.
-10. Por último, ejecuta `python playlist_es.py` y sigue las instrucciones para descargar una canción o una lista de reproducción de Spotify.
+7. Ejecute `cd spotify-playlist-downloader`.
+8. Ejecute `python playlist_es.py` y sigue las instrucciones para descargar una canción o una lista de reproducción de Spotify.
+
+    *Opcional* ejecutar en powershell `$env:SPOTIPY_CLIENT_ID='<your-client-id>'` o `set SPOTIPY_CLIENT_ID='<your-client-id>'` en caso no funcione el script de python, lo pide automáticamente para poder comenzar con la descarga.
+    *Opcional* ejecute en powershell `$env:SPOTIPY_CLIENT_SECRET='<your-client-secret>'` o `set SPOTIPY_CLIENT_SECRET='<your-client-secret>'` en caso no funcione el script de python, lo pide automáticamente para poder comenzar con la descarga.
 
 ## Requisitos previos
 Ejecuta el siguiente comando en la terminal después de navegar al directorio del proyecto:
