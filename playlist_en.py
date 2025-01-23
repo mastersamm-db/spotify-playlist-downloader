@@ -26,7 +26,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 console = Console()
 
 def main():
-    url, url_type = validate_url(input("Ingrese una URL de Spotify: ").strip())
+    url, url_type = validate_url(input("Enter a Spotify URL: ").strip())
     songs = [get_track_info(url)] if url_type == "track" else get_playlist_info(url)
 
     start_time = time.time()
