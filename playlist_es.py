@@ -1,18 +1,24 @@
 import os
 import re
-import shutil
+import subprocess
 import time
 import urllib.parse
 import urllib.request
-import requests
 import spotipy
-from moviepy import AudioFileClip
+from moviepy import *
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import APIC, ID3
-#from pytube import YouTube
 from yt_dlp import *
 from rich.console import Console
 from spotipy.oauth2 import SpotifyClientCredentials
+
+# Verificar la conexión a Internet
+def check_internet_connection():
+    try:
+        urllib.request.urlopen('http://google.com', timeout=5)
+        return True
+    except urllib.request.URLError:
+        return False
 
 # Inicializa las credenciales de Spotify desde variables de entorno
 SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
@@ -28,8 +34,23 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 console = Console()
 
 def main():
-    #url = validate_url(input("Ingrese una URL de Spotify: ").strip())
-    #songs = [get_track_info(url)] if "track" in url else get_playlist_info(url)
+    if not check_internet_connection():
+        raise EnvironmentError("No hay conexión a Internet. Verifique su conexión e intente nuevamente.")
+    
+    client_id = os.getenv("SPOTIPY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+
+    # Establecer las credenciales en el entorno usando PowerShell
+    # Pedir al usuario que ingrese las credenciales de Spotify
+    if not client_id:
+        client_id = input("Ingrese su SPOTIPY_CLIENT_ID: ").strip()
+        subprocess.run(["powershell", "-Command", f"$env:SPOTIPY_CLIENT_ID='{client_id}'"])
+
+    if not client_secret:
+        client_secret = input("Ingrese su SPOTIPY_CLIENT_SECRET: ").strip()
+        subprocess.run(["powershell", "-Command", f"$env:SPOTIPY_CLIENT_SECRET='{client_secret}'"])
+
+    output_dir = input("Nombre de la carpeta de destino: ").strip()
     url, url_type = validate_url(input("Ingrese una URL de Spotify: ").strip())
     songs = [get_track_info(url)] if url_type == "track" else get_playlist_info(url)
     
@@ -41,11 +62,11 @@ def main():
         try:
             video_link = find_youtube(search_term)
             console.print(f"[magenta]({i}/{len(songs)})[/magenta] Descargando '[cyan]{track_info['artist_name']} - {track_info['track_title']}[/cyan]'...")
-            audio = download_yt(video_link)
+            audio = download_yt(video_link,output_dir)
 
             if audio:
                 set_metadata(track_info, audio)
-                destination = os.path.join("../musicshazam", os.path.basename(audio))
+                destination = os.path.join("../"+output_dir, os.path.basename(audio))
                 os.replace(audio, destination)
                 downloaded += 1
             else:
@@ -53,17 +74,13 @@ def main():
         except Exception as e:
             console.print(f"[red]Error en {track_info['track_title']}: {e}[/red]")
 
-    #clean_temp_folder("../musicshazam/tmp") # Elimina la carpeta temporal
+    #clean_temp_folder("../"+output_dir+"/tmp") # Opcional eliminar la carpeta temporal
     end_time = time.time()
 
-    console.print(f"\nUbicación de descarga: {os.path.abspath('../musicshazam')}\n")
+    console.print(f"\nUbicación de descarga: {os.path.abspath('../'+output_dir)}\n")
     console.print(f"[green]DESCARGA COMPLETADA: {downloaded}/{len(songs)} canción(es) descargada(s).[/green]", style="on green")
     console.print(f"Tiempo total tomado: {round(end_time - start_time)} segundos", style="on white")
 
-#def validate_url(sp_url):
-    #if re.match(r"^(https?://)?open\.spotify\.com/(playlist|track)/.+", sp_url):
-        #return sp_url
-    #raise ValueError("URL de Spotify no válida")
 def validate_url(sp_url):
     match = re.match(r"^(https?://)?(open\.spotify\.com|open\.spotify\.com/intl-[a-z]{2})/(playlist|track)/.+", sp_url)
     if match:
@@ -107,11 +124,11 @@ def find_youtube(query):
     except Exception as e:
         raise ValueError(f"Fallo al encontrar video en YouTube: {e}")
 
-def download_yt(yt_link):
+def download_yt(yt_link,output_dir):
     try:
         # Configura las opciones para yt-dlp
-        output_dir = "../musicshazam/tmp2"
-        os.makedirs(output_dir, exist_ok=True)
+        output_dire = "../"+output_dir+"/tmp"
+        os.makedirs(output_dire, exist_ok=True)
 
         ydl_opts = {
             "format": "bestaudio/best",
@@ -123,14 +140,14 @@ def download_yt(yt_link):
                 }
             ],
             "ffmpeg_location": "C:\\ffmpeg\\bin",
-            "outtmpl": os.path.join(output_dir, "%(title)+.100U.%(ext)s"),
+            "outtmpl": os.path.join(output_dire, "%(title)+.100U.%(ext)s"),
             "quiet": False,
             "noplaylist": True,
         }
 
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(yt_link, download=True)
-            return os.path.join(output_dir, f"{info['title']}.mp3")
+            return os.path.join(output_dire, f"{info['title']}.mp3")
 
     except Exception as e:
         raise ValueError(f"No se pudo descargar el audio de YouTube: {e}")
@@ -159,7 +176,7 @@ def set_metadata(metadata, file_path):
     except Exception as e:
         raise ValueError(f"Fallo al establecer metadatos: {e}")
 
-#def clean_temp_folder(folder): # Elimina la carpeta temporal
+#def clean_temp_folder(folder): # Opcional elimina la carpeta temporal, no es necesario ya que algunos archivos dan error y se quedan alamacenados en la carptea tmp
     #if os.path.exists(folder):
         #shutil.rmtree(folder)
 
