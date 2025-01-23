@@ -26,7 +26,7 @@
 3. Create a [Spotify developers account](https://developer.spotify.com/dashboard/).
 4. Create an app by clicking on *create an app* and giving name and description for the app.
 5. Take a note of your *Client ID* and *Client Secret*, or URL URI *https://open.spotify.com/* from the app's page and selected *Web API*.
-6. Open your terminal and run `git clone https://github.com/mastersamm-db/spotify-downloader` or optionally download the zip file.
+6. Open your terminal and run `git clone https://github.com/mastersamm-db/spotify-playlist-downloader` or optionally download the zip file.
 7. run `cd spotify-downloader`.
 8. run in powershell `$env:SPOTIPY_CLIENT_ID='<your-client-id>'` or `set SPOTIPY_CLIENT_ID='<your-client-id>'` .
 9. run in powershell `$env:SPOTIPY_CLIENT_SECRET='<your-client-secret>'` or `set SPOTIPY_CLIENT_SECRET='<your-client-secret>'`.
@@ -67,7 +67,7 @@ pip install -r requirements.txt
 3. Cree una [cuenta de desarrollador de Spotify](https://developer.spotify.com/dashboard/).
 4. Cree una aplicación haciendo clic en *crear una aplicación* y dando un nombre y una descripción para la aplicación.
 5. Tome nota de su *Client ID* y *Client Secret*, o URL URI *https://open.spotify.com/* de la página de la aplicación y seleccionar *Web API*.
-6. Abra su terminal y ejecute `git clone https://github.com/mastersamm-db/spotify-downloader` u opcionalmente descargue el archivo zip.
+6. Abra su terminal y ejecute `git clone https://github.com/mastersamm-db/spotify-playlist-downloader` u opcionalmente descargue el archivo zip.
 7. ejecute `cd spotify-downloader`.
 8. ejecute en powershell `$env:SPOTIPY_CLIENT_ID='<your-client-id>'` o `set SPOTIPY_CLIENT_ID='<your-client-id>'`.
 9. ejecute en powershell `$env:SPOTIPY_CLIENT_SECRET='<your-client-secret>'` o `set SPOTIPY_CLIENT_SECRET='<your-client-secret>'`.
