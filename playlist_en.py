@@ -26,8 +26,8 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 console = Console()
 
 def main():
-    url = validate_url(input("Enter a Spotify URL: ").strip())
-    songs = [get_track_info(url)] if "track" in url else get_playlist_info(url)
+    url, url_type = validate_url(input("Ingrese una URL de Spotify: ").strip())
+    songs = [get_track_info(url)] if url_type == "track" else get_playlist_info(url)
 
     start_time = time.time()
     downloaded = 0
@@ -44,7 +44,7 @@ def main():
             audio = download_yt(video_link)
             if audio:
                 set_metadata(track_info, audio)
-                destination = os.path.join("../music", os.path.basename(audio))
+                destination = os.path.join("../musicmegusta", os.path.basename(audio))
                 os.replace(audio, destination)
                 downloaded += 1
             else:
@@ -53,10 +53,10 @@ def main():
         except Exception as e:
             console.print(f"[red]Error downloading {track_info['track_title']}: {e}[/red]")
 
-    #clean_temp_folder("../music/tmp") # Deteleted temp folder
+    #clean_temp_folder("../musicmegusta/tmp") # Deteleted temp folder
     end_time = time.time()
 
-    console.print(f"\nDownload location: {os.path.abspath('../music')}\n")
+    console.print(f"\nDownload location: {os.path.abspath('../musicmegusta')}\n")
     console.print(
         f"[green]DOWNLOAD COMPLETED: {downloaded}/{len(songs)} song(s) downloaded.[/green]",
         style="on green",
@@ -66,8 +66,10 @@ def main():
     )
 
 def validate_url(sp_url):
-    if re.match(r"^(https?://)?open\.spotify\.com/(playlist|track)/.+", sp_url):
-        return sp_url
+    match = re.match(r"^(https?://)?(open\.spotify\.com|open\.spotify\.com/intl-[a-z]{2})/(playlist|track)/.+", sp_url)
+    if match:
+        url_type = match.group(3)  # 'playlist' o 'track'
+        return sp_url, url_type
     raise ValueError("Invalid Spotify URL")
 
 def get_track_info(track_url):
@@ -111,7 +113,7 @@ def find_youtube(query):
 def download_yt(yt_link):
     try:
         # Configura las opciones para yt-dlp
-        output_dir = "../music/tmp"
+        output_dir = "../musicmegusta/tmp"
         os.makedirs(output_dir, exist_ok=True)
 
         ydl_opts = {
@@ -120,7 +122,7 @@ def download_yt(yt_link):
                 {
                     "key": "FFmpegExtractAudio",
                     "preferredcodec": "mp3",
-                    "preferredquality": "192",
+                    "preferredquality": "256",
                 }
             ],
             "ffmpeg_location": "C:\\ffmpeg\\bin",
