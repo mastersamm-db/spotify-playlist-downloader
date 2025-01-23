@@ -21,8 +21,25 @@ def check_internet_connection():
         return False
 
 # Inicializa las credenciales de Spotify desde variables de entorno
-SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
-SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
+def get_spotify_credentials():
+    client_id = os.getenv("SPOTIPY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+
+    if not client_id:
+        client_id = input("Ingrese su SPOTIPY_CLIENT_ID: ").strip()
+        subprocess.run(["powershell", "-Command", f"$env:SPOTIPY_CLIENT_ID='{client_id}'"])
+        #subprocess.run(["powershell", "-Command", f"set SPOTIPY_CLIENT_ID='{client_id}'"])
+        #os.environ["SPOTIPY_CLIENT_ID"] = client_id
+
+    if not client_secret:
+        client_secret = input("Ingrese su SPOTIPY_CLIENT_SECRET: ").strip()
+        subprocess.run(["powershell", "-Command", f"$env:SPOTIPY_CLIENT_SECRET='{client_secret}'"])
+        #subprocess.run(["powershell", "-Command", f"set SPOTIPY_CLIENT_SECRET='{client_secret}'"])
+        #os.environ["SPOTIPY_CLIENT_SECRET"] = client_secret
+
+    return client_id, client_secret
+
+SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET = get_spotify_credentials()
 
 if not SPOTIPY_CLIENT_ID or not SPOTIPY_CLIENT_SECRET:
     raise EnvironmentError("Faltan credenciales de la API de Spotify. Establezca SPOTIPY_CLIENT_ID y SPOTIPY_CLIENT_SECRET.")
@@ -36,19 +53,6 @@ console = Console()
 def main():
     if not check_internet_connection():
         raise EnvironmentError("No hay conexión a Internet. Verifique su conexión e intente nuevamente.")
-    
-    client_id = os.getenv("SPOTIPY_CLIENT_ID")
-    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
-
-    # Establecer las credenciales en el entorno usando PowerShell
-    # Pedir al usuario que ingrese las credenciales de Spotify
-    if not client_id:
-        client_id = input("Ingrese su SPOTIPY_CLIENT_ID: ").strip()
-        subprocess.run(["powershell", "-Command", f"$env:SPOTIPY_CLIENT_ID='{client_id}'"])
-
-    if not client_secret:
-        client_secret = input("Ingrese su SPOTIPY_CLIENT_SECRET: ").strip()
-        subprocess.run(["powershell", "-Command", f"$env:SPOTIPY_CLIENT_SECRET='{client_secret}'"])
 
     output_dir = input("Nombre de la carpeta de destino: ").strip()
     url, url_type = validate_url(input("Ingrese una URL de Spotify: ").strip())
@@ -96,7 +100,7 @@ def get_track_info(track_url):
             "track_title": track["name"],
             "track_number": track["track_number"],
             "isrc": track["external_ids"].get("isrc", ""),
-            "album_art": track["album"]["images"][1]["url"],
+            "album_art": track["album"]["images"][1]["url"] if len(track["album"]["images"]) > 1 else "",
             "album_name": track["album"]["name"],
             "release_date": track["album"]["release_date"],
             "artists": [artist["name"] for artist in track["artists"]],
@@ -111,7 +115,8 @@ def get_playlist_info(sp_playlist):
             raise ValueError("La lista de reproducción es privada. Cambia a pública.")
         
         tracks = [item["track"] for item in sp.playlist_tracks(sp_playlist)["items"]]
-        return [get_track_info(f"https://open.spotify.com/track/{track['id']}") for track in tracks]
+        return [get_track_info(f"https://open.spotify.com/track/{track['id']}") for track in tracks if 'id' in track]
+    
     except Exception as e:
         raise ValueError(f"Fallo al obtener información de la lista de reproducción: {e}")
 
